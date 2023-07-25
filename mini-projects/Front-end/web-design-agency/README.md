@@ -1,0 +1,1 @@
+A simple website for a web design agency, utilizing/empphasizing the new features from CSS that I have recently used: CSS Display Properties, CSS Float, Creating responsive webistes (for phones, tablets, desktops, etc.), and Media Queries.

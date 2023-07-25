@@ -1,0 +1,1 @@
+After learning HTML, I wanted to to fully utilize and familiarize with this programming language, here is my resume made from scratch by only HTML.

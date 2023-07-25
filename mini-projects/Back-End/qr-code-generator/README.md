@@ -1,0 +1,1 @@
+Utilizing Node.js, Native Node Modules, and NPM Package Manager to create the Qr-code generator.

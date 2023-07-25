@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="utf-8">
+  <title>Simon Game</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
+</head>
+
+<body>
+  <h1 id="level-title">Press A Key to Start</h1>
+  <div class="container">
+    <div class="row">
+
+      <div type="button" id="green" class="btn green">
+
+      </div>
+
+      <div type="button" id="red" class="btn red">
+
+      </div>
+    </div>
+
+    <div class="row">
+
+      <div type="button" id="yellow" class="btn yellow">
+
+      </div>
+
+      <div type="button" id="blue" class="btn blue">
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <button onclick="openScorePopup()" class="scores-button" id="score">Scores</button>
+  <div id="score-popup" class="info-popup">
+    <span onclick="closeScorePopup()" class="info-popup-close">&times;</span>
+    <h2>Game Scores</h2>
+    <p id="score-list"></p>
+  </div>
+
+  <button onclick="openInfoPopup()" class="info-button" id="how-to">How to Play</button>
+  <div id="info-popup" class="info-popup">
+    <span onclick="closeInfoPopup()" class="info-popup-close">&times;</span>
+    <h2>How to Play Simon Game</h2>
+    <p>The Simon game is a classic electronic memory game. The goal is to repeat the pattern of colored buttons that light up and play tones in the same order.</p>
+    <h3>Instructions:</h3>
+    <ol>
+      <li>Start the game by Pressing Any Key.</li>
+      <li>Watch and remember the sequence of colors and tones played.</li>
+      <li>Repeat the sequence by clicking on the buttons in the correct order.</li>
+      <li>The pattern will progressively become longer and more challenging.</li>
+      <li>If you make a mistake, the game will end.</li>
+      <li>Try to beat your high score and challenge your memory!</li>
+    </ol>
+  </div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+  <script src="./game.js" charset="utf-8"></script>
+</body>
+
+</html>
