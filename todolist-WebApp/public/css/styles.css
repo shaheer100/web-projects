@@ -1,0 +1,132 @@
+html {
+  background-color: #f0f0f0;
+  font-family: 'Arial', sans-serif;
+}
+
+h1 {
+  color: #003366;
+  text-align: center;
+  padding: 20px;
+  margin: 0;
+  background-color: #f0f0f0;
+}
+
+.box {
+  max-width: 400px;
+  margin: 50px auto;
+  background: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  border: 2px solid #003366;
+}
+
+#heading {
+  background-color: #003366;
+  color: #fff;
+  text-align: center;
+  padding: 10px;
+  border-radius: 5px 5px 0 0;
+  margin: -20px;
+  margin-bottom: 20px;
+}
+
+.item {
+  min-height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 10px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.item:last-child {
+  border-bottom: none;
+}
+
+input[type="checkbox"] {
+  appearance: none; 
+  width: 20px;
+  height: 20px;
+  border: 2px solid #003366; 
+  border-radius: 4px;
+  margin-right: 15px; 
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+input[type="checkbox"]:checked {
+  background-color: #003366;
+  border-color: #003366;
+}
+
+input[type="checkbox"]:checked::before {
+  content: '\2713'; 
+  font-size: 16px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+input[type="checkbox"]::before {
+  content: '';
+  display: none;
+}
+
+p {
+  margin: 0;
+  font-size: 18px;
+  color: #333;
+}
+
+form {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+button {
+  min-height: 50px;
+  min-width: 50px;
+  border-radius: 50%;
+  background-color: #003366;
+  color: #fff;
+  font-size: 24px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-right: 10px; 
+}
+
+button:hover {
+  background-color: #00204a;
+}
+
+input[type="text"] {
+  flex: 1;
+  height: 40px;
+  padding: 0 10px;
+  border: none;
+  border-radius: 5px 0 0 5px;
+  font-size: 16px;
+  margin-right: 10px; 
+}
+
+input[type="text"]:focus {
+  outline: none;
+  box-shadow: 0 0 5px #003366;
+}
+
+footer {
+  color: #555;
+  text-align: center;
+  padding: 20px 0;
+  background-color: #f0f0f0;
+}
+
+footer p {
+  margin: 0;
+}
