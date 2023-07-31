@@ -81,7 +81,7 @@ p {
   color: #333;
 }
 
-form {
+form.item {
   display: flex;
   align-items: center;
   justify-content: center;
