@@ -55,14 +55,26 @@ app.get("/", async (req, res) =>  {
 
   const formattedDate = currentDate.toLocaleDateString(undefined, options);
 
+  // error handling
+  const db = mongoose.connection;
+  
+  db.on("error", (error) => {
+    console.error("Database connection error:", error);
+  });
+
   // tap into model and find everything in the items collection
   // will display the default items ensuring they don't stack
   // render the items that are present in the database
   try {
     const foundItems = await Item.find({});
     if (foundItems.length === 0) {
-      await Item.insertMany(defaultItems);
-      console.log("Successfully saved default items to DB.");
+      try {
+        await Item.insertMany(defaultItems);
+        console.log("Default items inserted successfully:");
+      } catch (err) {
+        console.error("Error adding defeault items:", err);
+        res.status(500).send("Error adding default items.");
+      }
       res.redirect("/");
     } else {
       res.render("list", { date: formattedDate, newListItems: foundItems, listTitle: "Main" });
@@ -85,9 +97,13 @@ app.get("/:listName", async (req, res) => {
         name: listName,
         items: defaultItems
       });
-    
-      await list.save();
-      res.redirect("/" + listName);
+      try {
+        await list.save();
+        res.redirect("/" + listName);
+      } catch (err) {
+        console.error("Error saving item:", err);
+        res.status(500).send("Error saving item.");
+      }
     } else {
       res.render("list", { date: formattedDate, newListItems: foundList.items, listTitle: listName });
     }
