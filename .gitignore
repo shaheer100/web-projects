@@ -134,3 +134,9 @@ dist
 etc.
 Web Development Certificate.pdf
 .vscode
+
+# heroku
+/node_modules
+npm-debug.log
+.DS_Store
+/*.env
