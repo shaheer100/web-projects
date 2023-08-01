@@ -44,6 +44,8 @@ const listsSchema = {
 
 const List = mongoose.model("List", listsSchema);
 
+const firstTime = false;
+
 app.get("/", async (req, res) =>  {
   const currentDate = new Date();
   const options = {
@@ -67,10 +69,11 @@ app.get("/", async (req, res) =>  {
   // render the items that are present in the database
   try {
     const foundItems = await Item.find({});
-    if (foundItems.length === 0) {
+    if (foundItems.length === 0 && firstTime) {
       try {
         await Item.insertMany(defaultItems);
         console.log("Default items inserted successfully:");
+        firstTime = true;
       } catch (err) {
         console.error("Error adding defeault items:", err);
         res.status(500).send("Error adding default items.");
@@ -174,7 +177,7 @@ app.get("/about", (req, res) => {
 
 let port = process.env.PORT;
 if (port == null || port == "") {
-  port = 3000;
+  port = 4000;
 }
 
 app.listen(port, () => {
