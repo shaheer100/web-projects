@@ -11,7 +11,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static("public"));
 
 // creating a new database
-mongoose.connect("mongodb://localhost:27017/listDB");
+mongoose.connect("mongodb+srv://admin-shaheer:Test123@cluster0.p7p6tvn.mongodb.net/listDB");
 
 // mongoose schema, with field name and type
 const itemsSchema = {
@@ -55,28 +55,14 @@ app.get("/", async (req, res) =>  {
 
   const formattedDate = currentDate.toLocaleDateString(undefined, options);
 
-  // error handling
-  const db = mongoose.connection;
-
-  db.on("error", (error) => {
-    console.error("Database connection error:", error);
-  });
-  
   // tap into model and find everything in the items collection
   // will display the default items ensuring they don't stack
   // render the items that are present in the database
   try {
     const foundItems = await Item.find({});
     if (foundItems.length === 0) {
-      db.once("open", async () => {
-        console.log("Connected to the database");
-        try {
-          await Item.insertMany(defaultItems);
-          console.log("Default items inserted successfully:");
-        } catch (err) {
-          console.error(err);
-        }
-      });
+      await Item.insertMany(defaultItems);
+      console.log("Successfully saved default items to DB.");
       res.redirect("/");
     } else {
       res.render("list", { date: formattedDate, newListItems: foundItems, listTitle: "Main" });
