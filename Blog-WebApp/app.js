@@ -1,23 +1,41 @@
 import express from "express";
 import bodyParser from "body-parser";
-import ejs from "ejs";
+import mongoose from "mongoose";
 import _ from "lodash";
 
 const homeStartingContent = "home";
 const aboutContent = "about";
 const contactContent = "contact";
 
-const app = express(); //setting up the app
-
-let posts = [];
+//setting up the app
+const app = express();
 
 app.set('view engine', 'ejs');
 
+// static files are in the public folder
 app.use(bodyParser.urlencoded({extended: true}));
-app.use(express.static("public")); // static files are in the public folder
+app.use(express.static("public")); 
 
-app.get("/", (req, res) => {
-  res.render("home.ejs", { startingContent: homeStartingContent, posts: posts});
+// creating a new database
+mongoose.connect("mongodb+srv://shaheersheeraz22:Test123@cluster0.ndvvhaa.mongodb.net/blogDB");
+
+// mongoose schema, with field name and type
+const postsSchema = {
+  title: String,
+  body: String
+}
+
+// mongoose model
+const Post = mongoose.model("Post", postsSchema); 
+
+app.get("/", async (req, res) => {
+  try {
+    const posts = await Post.find({});
+    res.render("home.ejs", { startingContent: homeStartingContent, posts: posts});
+  } catch (err) {
+    console.error("Error loading posts:", err);
+    res.status(500).send("Error loading posts.");
+  }
 });
 
 app.get("/about", (req, res) => {
@@ -32,28 +50,33 @@ app.get("/compose", (req, res) => {
   res.render("compose.ejs");
 });
 
-app.post("/compose", (req, res) => {
-  const post = {
-    title: req.body.postTitle,
-    body: req.body.postBody
-  };
-  
-  posts.push(post);
+app.post("/compose", async (req, res) => {
+  const postTitle = req.body.postTitle;
+  const postContent = req.body.postBody;
 
-  res.redirect("/");
+  const post = new Post({
+    title: postTitle,
+    body: postContent
+  });
+  
+  try {
+    await post.save();
+    res.redirect("/");
+  } catch (err) {
+    console.error("Error saving post:", err);
+    res.status(500).send("Error saving post.");
+  }
 });
 
-app.get("/posts/:postName", (req, res) => {
-  const requestedPost = _.lowerCase(req.params.postName);
-  
-  posts.forEach(post => {
-    const storedPost = _.lowerCase(post.title);
-
-    if (storedPost === requestedPost) {
-      res.render("post.ejs", { title: post.title, body: post.body });
-    } 
-  });
-
+app.get("/posts/:postID", async (req, res) => {
+  const postID = req.params.postID;
+  try {
+    const requestedPost = await Post.findOne({ _id: postID });
+    res.render("post.ejs", { title: requestedPost.title, body: requestedPost.body });
+  } catch (err) {
+    console.error("Error finding specified post:", err);
+    res.status(500).send("Error finding specified post.");
+  }
 });
 
 // Start the server
