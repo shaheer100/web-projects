@@ -21,17 +21,20 @@ mongoose.connect("mongodb+srv://shaheersheeraz22:Test123@cluster0.ndvvhaa.mongod
 
 // mongoose schema, with field name and type
 const postsSchema = {
+  username: String,
   title: String,
-  body: String
+  body: String,
+  date: String
 }
 
 // mongoose model
 const Post = mongoose.model("Post", postsSchema); 
 
 app.get("/", async (req, res) => {
+  const address = req.url;
   try {
     const posts = await Post.find({});
-    res.render("home.ejs", { startingContent: homeStartingContent, posts: posts});
+    res.render("home.ejs", { address: address, posts: posts});
   } catch (err) {
     console.error("Error loading posts:", err);
     res.status(500).send("Error loading posts.");
@@ -47,7 +50,7 @@ app.get("/contact", (req, res) => {
 });
 
 app.get("/compose", (req, res) => {
-  res.render("compose.ejs");
+  res.render("compose.ejs", { address: address });
 });
 
 app.post("/compose", async (req, res) => {

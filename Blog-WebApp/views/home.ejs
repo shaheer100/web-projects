@@ -1,18 +1,49 @@
 <%- include("partials/header.ejs") %>
+<body>
+    <main class="container">
+        <div class="p-4 p-md-5 mb-4 rounded text-body-emphasis bg-body-secondary">
+            <div class="col-lg-6 px-0">
+                <h1 class="display-4 fst-italic">Welcome to my Blog Web App!</h1>
+                <p class="lead my-3">ONCE I AM DONE I NEED TO EXPLAIN THE KEY THINGS THAT I WORKED ON FOR THIS PROJECT!!</p>
+                <p class="lead mb-0"><a href="#" class="text-body-emphasis fw-bold">Continue reading...</a></p>
+            </div>
+        </div>
 
-    <h1>HOME</h1>
-    <p><%= startingContent %></p>
+        <div class="row g-5">
+            <div class="col-md-8">
+              <h3 class="pb-4 mb-4 fst-italic border-bottom">
+                Recent Blog Posts
+              </h3>
 
-    <% posts.forEach(post => { %>
-        <h1><%= post.title %></h1>
-        <p>
-            <% if (post.body.length <= 100) { %>
-            <%= post.body %>
-            <% } else { %>
-            <%= post.body.substring(0, 100) + " ..." %>
-            <% } %>
-        </p>
-        <a href="/posts/<%= post._id %>">Read More</a>
-    <% }); %>
+              <article class="blog-post">
+                <h2 class="display-5 link-body-emphasis mb-1">Sample blog post</h2>
+                <p class="blog-post-meta">January 1, 2021 by <a href="#">Mark</a></p>
+      
+                <p>This blog post shows a few different types of content that’s supported and styled with Bootstrap. Basic typography, lists, tables, images, code, and more are all supported as expected.</p>
+                <hr>                
+              </article> 
+              
+            </div>
+        
+            <div class="col-md-4">
+              <div class="position-sticky" style="top: 2rem;">
+                <div class="p-4 mb-3 bg-body-tertiary rounded">
+                  <h4 class="fst-italic">About</h4>
+                  <p class="mb-0">Hello! I'm Shaheer Sheeraz, a passionate change-maker devoted to creating innovative software and data science solutions. Currently pursuing a Double Degree in Computer Science @ UWaterloo and Business Administration @ Laurier, my expertise in Python, C, and Java empowers me to tackle challenges with a data-driven and analytical approach.</p>
+                </div>
+                    
+                <div class="p-4">
+                  <h4 class="fst-italic">Elsewhere</h4>
+                  <ol class="list-unstyled">
+                    <li><a href="https://github.com/shaheer100/web-projects/tree/main/todolist-WebApp">GitHub</a></li>
+                    <li><a href="https://www.linkedin.com/in/shaheer-sheeraz-7648001a9/">LinkedIn</a></li>
+                    <li><a href="mailto:ssheeraz@uwaterloo.ca">Email</a></li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+    </main>
 
 <%- include("partials/footer.ejs") %>
