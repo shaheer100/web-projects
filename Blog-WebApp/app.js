@@ -50,6 +50,7 @@ app.get("/contact", (req, res) => {
 });
 
 app.get("/compose", (req, res) => {
+  const address = req.url;
   res.render("compose.ejs", { address: address });
 });
 
