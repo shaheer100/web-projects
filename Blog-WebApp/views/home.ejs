@@ -5,7 +5,6 @@
           <div class="col-lg-6 px-0">
               <h1 class="display-4 fst-italic">Welcome to my Blog Web App!</h1>
               <p class="lead my-3">ONCE I AM DONE I NEED TO EXPLAIN THE KEY THINGS THAT I WORKED ON FOR THIS PROJECT!!</p>
-              <p class="lead mb-0"><a href="#" class="text-body-emphasis fw-bold">Continue reading...</a></p>
           </div>        
       </div>
 
@@ -18,7 +17,7 @@
             <% posts.forEach(post => { %>
             <article class="blog-post">
               <h2 class="display-5 link-body-emphasis mb-1"><%= post.title %></h2>
-              <p class="blog-post-meta">January 1, 2021 by Mark</p>
+              <p class="blog-post-meta"><%= post.date %> by Mark</p>
               <p>
                 <% if (post.body.length <= 100) { %>
                 <%= post.body %>

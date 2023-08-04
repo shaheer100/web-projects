@@ -6,7 +6,7 @@
                 <div class="card-body">
                     <div class="row g-5">
                         <h2><%= title %></h2>
-                        <p class="blog-post-meta postTitle">January 1, 2021 by Mark</p>
+                        <p class="blog-post-meta postTitle"><%= date %> by Mark</p>
                         <p class="postBody"><%= body %></p>
                         <p>HAVE AN IF STATEMENT FOR DELETE</p>
                     </div>
@@ -15,4 +15,12 @@
         </main>
     </div>
 
-<%- include("partials/footer.ejs") %>
+    <footer class="py-3 text-center text-body-secondary bg-body-tertiary postFooter">
+        <p>Shaheer Sheeraz @ 
+          <% const d = new Date(); %>
+          <% const year = d.getFullYear(); %>
+          <%= year %>
+        </p>
+    </footer>
+</body>
+</html>

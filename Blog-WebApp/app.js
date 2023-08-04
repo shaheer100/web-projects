@@ -25,18 +25,17 @@ app.use(express.static("public"));
 mongoose.connect("mongodb+srv://shaheersheeraz22:Test123@cluster0.ndvvhaa.mongodb.net/blogDB");
 
 // mongoose schema, with field name and type
-const postsSchema = {
+const postsSchema = new mongoose.Schema ({
   username: String,
   title: String,
   body: String,
   date: String
-}
+});
 
 // mongoose model
-const Post = mongoose.model("Post", postsSchema); 
+const Post = new mongoose.model("Post", postsSchema); 
 
 app.get("/", async (req, res) => {
-  console.log(formattedDate);
   const address = req.url;
   try {
     const posts = await Post.find({});
@@ -86,7 +85,7 @@ app.get("/posts/:postID", async (req, res) => {
   const postID = req.params.postID;
   try {
     const requestedPost = await Post.findOne({ _id: postID });
-    res.render("post.ejs", { title: requestedPost.title, body: requestedPost.body, address: address });
+    res.render("post.ejs", { title: requestedPost.title, body: requestedPost.body, address: address, date: requestedPost.date });
   } catch (err) {
     console.error("Error finding specified post:", err);
     res.status(500).send("Error finding specified post.");

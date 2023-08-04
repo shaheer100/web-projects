@@ -88,4 +88,10 @@ textarea {
 
 .postBody {
   margin-top: 25px;
+  max-height: 500px; 
+  overflow-y: auto;
+}
+
+.postFooter {
+  margin: 20px 0;
 }
