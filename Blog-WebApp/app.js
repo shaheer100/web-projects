@@ -3,9 +3,14 @@ import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import _ from "lodash";
 
-const homeStartingContent = "home";
-const aboutContent = "about";
-const contactContent = "contact";
+const currentDate = new Date();
+const monthNames = [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+const day = currentDate.getDate();
+const month = monthNames[currentDate.getMonth()];
+const year = currentDate.getFullYear();
+
+const formattedDate = `${month} ${day}, ${year}`;
 
 //setting up the app
 const app = express();
@@ -13,7 +18,7 @@ const app = express();
 app.set('view engine', 'ejs');
 
 // static files are in the public folder
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public")); 
 
 // creating a new database
@@ -31,6 +36,7 @@ const postsSchema = {
 const Post = mongoose.model("Post", postsSchema); 
 
 app.get("/", async (req, res) => {
+  console.log(formattedDate);
   const address = req.url;
   try {
     const posts = await Post.find({});
@@ -62,7 +68,8 @@ app.post("/compose", async (req, res) => {
 
   const post = new Post({
     title: postTitle,
-    body: postContent
+    body: postContent,
+    date: formattedDate
   });
   
   try {
