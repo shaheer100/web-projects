@@ -41,12 +41,14 @@ app.get("/", async (req, res) => {
   }
 });
 
-app.get("/about", (req, res) => {
-  res.render("about.ejs", { about: aboutContent });
+app.get("/login", (req, res) => {
+  const address = req.url;
+  res.render("login.ejs", { address: address });
 });
 
-app.get("/contact", (req, res) => {
-  res.render("contact.ejs", { contact: contactContent });
+app.get("/register", (req, res) => {
+  const address = req.url;
+  res.render("register.ejs", { address: address });
 });
 
 app.get("/compose", (req, res) => {
@@ -73,10 +75,11 @@ app.post("/compose", async (req, res) => {
 });
 
 app.get("/posts/:postID", async (req, res) => {
+  const address = req.url;
   const postID = req.params.postID;
   try {
     const requestedPost = await Post.findOne({ _id: postID });
-    res.render("post.ejs", { title: requestedPost.title, body: requestedPost.body });
+    res.render("post.ejs", { title: requestedPost.title, body: requestedPost.body, address: address });
   } catch (err) {
     console.error("Error finding specified post:", err);
     res.status(500).send("Error finding specified post.");
