@@ -81,3 +81,11 @@ html, body {
 textarea {
   margin-bottom: 10px;
 }
+
+.postTitle {
+  margin: 0%;
+}
+
+.postBody {
+  margin-top: 25px;
+}
