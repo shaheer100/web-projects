@@ -1,8 +1,14 @@
+import dotenv from "dotenv";
 import express from "express";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import _ from "lodash";
+import ejs from "ejs";
+import session from "express-session";
+import passport from "passport";
+import passportLocalMongoose from "passport-local-mongoose";
 
+// getting the formatted date (Month day, year)
 const currentDate = new Date();
 const monthNames = [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
@@ -12,28 +18,60 @@ const year = currentDate.getFullYear();
 
 const formattedDate = `${month} ${day}, ${year}`;
 
-//setting up the app
+//setting up the app, static files in public folder, setting up ejs
 const app = express();
-
 app.set('view engine', 'ejs');
-
-// static files are in the public folder
-app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public")); 
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// use the session package, setting it up with initial configurations
+app.use(session({
+  secret: "messi",
+  resave: false,
+  saveUninitialized: false
+}));
+
+// use and initialize passport packages, and use passport for managing those sessions
+app.use(passport.initialize());
+app.use(passport.session());
 
 // creating a new database
 mongoose.connect("mongodb+srv://shaheersheeraz22:Test123@cluster0.ndvvhaa.mongodb.net/blogDB");
 
-// mongoose schema, with field name and type
+// mongoose schemas, with field name and type
 const postsSchema = new mongoose.Schema ({
-  username: String,
+/*   user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  }, */
   title: String,
   body: String,
   date: String
 });
 
-// mongoose model
+const usersSchema = new mongoose.Schema ({
+  username: String,
+  email: String,
+  Password: String,
+/*   posts: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Post",
+    },
+  ], */
+});
+
+// used to hash + salt passwords, and save users into MongoDB database
+usersSchema.plugin(passportLocalMongoose); 
+
+// mongoose models
 const Post = new mongoose.model("Post", postsSchema); 
+const User = new mongoose.model("User", usersSchema);
+
+passport.use(User.createStrategy());
+
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 
 app.get("/", async (req, res) => {
   const address = req.url;
@@ -53,6 +91,16 @@ app.get("/login", (req, res) => {
 
 app.get("/register", (req, res) => {
   const address = req.url;
+
+  User.register({ username: req.body.username }, req.body.password, (err, user) => {
+    if (err) {
+      console.log(err);
+      res.redirect("/register");
+    } else {
+
+    }
+  });
+
   res.render("register.ejs", { address: address });
 });
 
@@ -90,6 +138,11 @@ app.get("/posts/:postID", async (req, res) => {
     console.error("Error finding specified post:", err);
     res.status(500).send("Error finding specified post.");
   }
+});
+
+app.get("/users/:userID", async(req, res) => {
+  const address = req.url;
+  const userID = req.params.userID;
 });
 
 // Start the server
