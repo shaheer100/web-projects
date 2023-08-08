@@ -19,18 +19,18 @@
             </h3>
             
             <% posts.forEach(post => { %>
-            <article class="blog-post">
-              <h2 class="display-5 link-body-emphasis mb-1"><%= post.title %></h2>
-              <p class="blog-post-meta"><%= post.date %> by Mark</p>
-              <p>
-                <% if (post.body.length <= 100) { %>
-                <%= post.body %>
-                <% } else { %>
-                <%= post.body.substring(0, 100) + " ..." %>
-                <% } %>
-              </p>
-              <a href="/posts/<%= post._id %>">Read More</a>
-            </article>
+              <article class="blog-post">
+                <h2 class="display-5 link-body-emphasis mb-1"><%= post.title %></h2>
+                <p class="blog-post-meta"><%= post.date %> by Mark</p>
+                <p>
+                  <% if (post.body.length <= 100) { %>
+                  <%= post.body %>
+                  <% } else { %>
+                  <%= post.body.substring(0, 100) + " ..." %>
+                  <% } %>
+                </p>
+                <a href="/posts/<%= post._id %>">Read More</a>
+              </article>
             <% }); %>
         </div>
     
