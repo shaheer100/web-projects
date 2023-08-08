@@ -26,6 +26,11 @@
               </div>
               <button type="submit" class="btn btn-dark">Register</button>
               <p>Already have an account? <a href="/login">Login</a></p>
+              <% if (locals.error) { %>
+                <div class="error-message">
+                  <p><%= error %></p>
+                </div>
+              <% } %>
             </form>
 
           </div>
