@@ -14,24 +14,24 @@
 
     <div class="row g-5">
         <div class="col-md-8">
-          <h3 class="pb-4 mb-4 fst-italic border-bottom">
-            Recent Blog Posts
-          </h3>
-          
-          <% posts.forEach(post => { %>
-          <article class="blog-post">
-            <h2 class="display-5 link-body-emphasis mb-1"><%= post.title %></h2>
-            <p class="blog-post-meta"><%= post.date %> by Mark</p>
-            <p>
-              <% if (post.body.length <= 100) { %>
-              <%= post.body %>
-              <% } else { %>
-              <%= post.body.substring(0, 100) + " ..." %>
-              <% } %>
-            </p>
-            <a href="/posts/<%= post._id %>">Read More</a>
-          </article>
-          <% }); %>
+            <h3 class="pb-4 mb-4 fst-italic border-bottom">
+              Recent Blog Posts
+            </h3>
+            
+            <% posts.forEach(post => { %>
+            <article class="blog-post">
+              <h2 class="display-5 link-body-emphasis mb-1"><%= post.title %></h2>
+              <p class="blog-post-meta"><%= post.date %> by Mark</p>
+              <p>
+                <% if (post.body.length <= 100) { %>
+                <%= post.body %>
+                <% } else { %>
+                <%= post.body.substring(0, 100) + " ..." %>
+                <% } %>
+              </p>
+              <a href="/posts/<%= post._id %>">Read More</a>
+            </article>
+            <% }); %>
         </div>
     
         <div class="col-md-4">
