@@ -8,6 +8,9 @@ import session from "express-session";
 import passport from "passport";
 import passportLocalMongoose from "passport-local-mongoose";
 
+let auth = false;
+let userID = "";
+
 // getting the formatted date (Month day, year)
 const currentDate = new Date();
 const monthNames = [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -46,12 +49,12 @@ const postsSchema = new mongoose.Schema ({
   },
   title: String,
   body: String,
-  date: String
+  date: String,
 });
 
 const usersSchema = new mongoose.Schema ({
-  email: String,
-  password: String
+  username: String,
+  Password: String,
 });
 
 // used to hash + salt passwords, and save users into MongoDB database
@@ -63,111 +66,93 @@ const User = new mongoose.model("User", usersSchema);
 
 passport.use(User.createStrategy());
 
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
+passport.serializeUser(function(user, done) {
+  done(null, user);
+});
 
-app.get("/", async (req, res) => {
-  const address = req.url;
-  const userID = req.isAuthenticated() ? req.user._id : "";
-  
-  try {
-    const posts = await Post.find({});
-    res.render("home.ejs", { 
-      address: address, 
-      posts: posts, 
-      auth: req.isAuthenticated(), 
-      userID: userID 
+passport.deserializeUser((id, done) => {
+  User.findById(id)
+    .then(user => {
+      done(null, user);
+    })
+    .catch(err => {
+      done(err, null);
     });
-  } catch (err) {
-    console.error("Error loading posts:", err);
-    res.status(500).send("Error loading posts.");
-  }
 });
 
 app.get("/register", (req, res) => {
-  const address = req.url;
-  const userID = req.isAuthenticated() ? req.user._id : "";
+  if (req.isAuthenticated()) {
+    auth = true;
+    userID = auth ? req.user._id : "";
+  }
 
-  res.render("register.ejs", { 
-    address: address, 
-    auth: req.isAuthenticated(), 
-    userID: userID 
-  });
+  console.log(auth);
+  const address = req.url;
+
+  res.render("register.ejs", { address: address, auth: auth, userID: userID });
 });
 
-app.post("/register", async (req, res) => {  
-  const address = req.url;
-  const userID = req.isAuthenticated() ? req.user._id : "";
-
-/*   const { username, aboutme, email, password } = req.body;
-
+app.post("/register", async (req, res) => {
   const newUser = new User({
-    displayName: username,
-    aboutMe: aboutme,
-    username: email
-  }); */
+    username: req.body.username,
+    Password: req.body.password,
+  });
 
-  User.register({ username: req.body.username }, req.body.password, (err, user) => {
+  User.register(newUser, req.body.password , function(err,user){
     if (err) {
-      console.log(err);
-      res.render("register", { 
-        address: address, 
-        auth: req.isAuthenticated(),
-        userID: userID,
-        error: err
-      });
-    } else {
-      passport.authenticate("local")(req, res, () => {
+      console.log(err); res.redirect("/register");
+    }
+    else{
+      console.log(user + "2");
+      passport.authenticate("local")(req,res,function(){
         res.redirect("/");
-      });
+      })
     }
   });
 });
 
 app.get("/login", (req, res) => {
+  if (req.isAuthenticated()) {
+    auth = true;
+    userID = auth ? req.user._id : "";
+  }
+
+  console.log(auth);
   const address = req.url;
-  const userID = req.isAuthenticated() ? req.user._id : "";
 
-  console.log(req.isAuthenticated());
-
-  res.render("login", {
-    address: address,
-    auth: req.isAuthenticated(),
-    userID: userID
-  });
+  res.render("login.ejs", { address: address, auth: auth, userID: userID });
 });
 
-app.post("/login", function(req, res){
-  const user = new User({
-    username: req.body.username,
-    password: req.body.password
-  });
-
-  req.login(user, function(err){
-    if (err) {
-      console.log(err);
-    } else {
-      passport.authenticate("local")(req, res, function(){
-        res.redirect("/");
-      });
-    }
-  });
-});
+app.post("/login", passport.authenticate("local", {
+  successRedirect: "/",
+  failureRedirect: "/login",
+}));
 
 app.get("/logout", (req, res) => {
-  req.logout();
-  res.redirect("/");
+  auth = false;
+  req.logout((err) => {
+    if (err) {
+      console.error("Logout error:", err);
+      return res.redirect("/");
+    }
+    res.redirect("/");
+  });
 });
 
 app.get("/compose", (req, res) => {
-  const address = req.url;
-  const userID = req.isAuthenticated() ? req.user._id : "";
+  if (req.isAuthenticated()) {
+    auth = true;
+    userID = auth ? req.user._id : "";
+  }
 
-  res.render("compose.ejs", { 
-    address: address, 
-    auth: req.isAuthenticated(), 
-    userID: userID 
-  });
+  console.log(auth);
+  const address = req.url;
+
+  if (req.isAuthenticated()) {
+    res.render("compose.ejs", { address: address, auth: auth, userID: userID });
+  } else {
+    res.render("login.ejs", { address: address, auth: auth, userID: userID });
+  }
 });
 
 app.post("/compose", async (req, res) => {
@@ -191,20 +176,18 @@ app.post("/compose", async (req, res) => {
 });
 
 app.get("/posts/:postID", async (req, res) => {
+  if (req.isAuthenticated()) {
+    auth = true;
+    userID = auth ? req.user._id : "";
+  }
+
+  console.log(auth);
   const address = req.url;
-  const userID = req.isAuthenticated() ? req.user._id : "";
 
   const postID = req.params.postID;
   try {
     const requestedPost = await Post.findOne({ _id: postID });
-    res.render("post.ejs", { 
-      title: requestedPost.title, 
-      body: requestedPost.body, 
-      address: address, 
-      date: requestedPost.date, 
-      auth: req.isAuthenticated(), 
-      userID: userID 
-    });
+    res.render("post.ejs", { title: requestedPost.title, body: requestedPost.body, address: address, date: requestedPost.date, auth: auth, userID: userID });
   } catch (err) {
     console.error("Error finding specified post:", err);
     res.status(500).send("Error finding specified post.");
@@ -212,31 +195,38 @@ app.get("/posts/:postID", async (req, res) => {
 });
 
 app.get("/users/:userID", async (req, res) => {
-  const address = req.url;
-  const userID = req.params.userID;
-
-  let postsWithSpecificUser;
-  try {
-    postsWithSpecificUser = await Post.find({ user: userID });
-  } catch (err) {
-    console.error("Error finding specified user's posts:", err);
-    res.status(500).send("Error finding specified user's posts.");
-    return;
+  if (req.isAuthenticated()) {
+    auth = true;
+    userID = auth ? req.user._id : "";
   }
 
+  console.log(auth);
+  const address = req.url;
+
   try {
-    const requestedUser = await User.findOne({ _id: userID });
-    res.render("user.ejs", { 
-      username: requestedUser.displayName, 
-      aboutMe: requestedUser.aboutMe, 
-      address: address, 
-      auth: req.isAuthenticated(), 
-      userID: userID, 
-      posts: postsWithSpecificUser 
-    });
+    const requestedUser = await User.findOne({ _id: req.user._id });
+    res.render("user.ejs", { username: requestedUser.username, address: address, auth: auth, userID: userID });
   } catch (err) {
     console.error("Error finding specified user:", err);
     res.status(500).send("Error finding specified user.");
+  }
+});
+
+app.get("/", async (req, res) => {
+  if (req.isAuthenticated()) {
+    auth = true;
+    userID = auth ? req.user._id : "";
+  }
+
+  console.log(auth);
+  const address = req.url;
+  
+  try {
+    const posts = await Post.find({});
+    res.render("home.ejs", { address: address, posts: posts, auth: auth, userID: userID });
+  } catch (err) {
+    console.error("Error loading posts:", err);
+    res.status(500).send("Error loading posts.");
   }
 });
 
@@ -244,4 +234,3 @@ app.get("/users/:userID", async (req, res) => {
 app.listen(3000, () => {
   console.log("Server started on http://localhost:3000");
 });
-

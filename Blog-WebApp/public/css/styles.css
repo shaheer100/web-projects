@@ -95,3 +95,16 @@ textarea {
 .postFooter {
   margin: 20px 0;
 }
+
+.error-message {
+  color: red;
+  font-size: 14px;
+}
+
+.userPosts {
+  margin-top: 10px;
+}
+
+.register {
+  margin-bottom: 10px;
+}

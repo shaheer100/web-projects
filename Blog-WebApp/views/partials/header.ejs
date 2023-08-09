@@ -19,7 +19,7 @@
       
       <a class="nav-item nav-link link-body-emphasis <% if (address === "/") { %>active<% } %>" href="/">Home</a>
       <a class="nav-item nav-link link-body-emphasis <% if (address === ("/users/" + userID)) { %>active<% } %>" href="<%= auth ? "/users/" + userID : "/login" %>">User Profile</a>
-      <a class="nav-item nav-link link-body-emphasis <% if (address === "/compose") { %>active<% } %>" href="/compose">Compose</a>
+      <a class="nav-item nav-link link-body-emphasis <% if (address === "/compose") { %>active<% } %>" href="<%= auth ? "/compose" : "/login" %>">Compose</a>
       
       <div class="col-4 d-flex justify-content-end align-items-center">
         <a class="logout nav-link" href="<%= auth ? "/logout" : "/login" %>">

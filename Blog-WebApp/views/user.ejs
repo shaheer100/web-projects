@@ -2,13 +2,30 @@
 
     <div class="container mt-5">
         <h2><%= username %></h2>
-
-        <div class="row g-5">
+        <p><%= aboutMe %></p>
+        <div class="row g-5 userPosts">
             <div class="col-md-8">
                 <h3 class="pb-4 mb-4 fst-italic border-bottom">
                     Recent Blog Posts
                 </h3>
-    
+                <% if (posts.length === 0) { %>
+                    <p>There are no blog posts by this user.</p>
+                <% } else { %>
+                    <% posts.forEach(post => { %>
+                        <article class="blog-post">
+                            <h2 class="display-5 link-body-emphasis mb-1"><%= post.title %></h2>
+                            <p class="blog-post-meta"><%= post.date %> by <%= post.user.username %>></p>
+                            <p>
+                            <% if (post.body.length <= 100) { %>
+                            <%= post.body %>
+                            <% } else { %>
+                            <%= post.body.substring(0, 100) + " ..." %>
+                            <% } %>
+                            </p>
+                            <a href="/posts/<%= post._id %>">Read More</a>
+                        </article>
+                    <% }); %>
+                <% } %>
             </div>
         </div>    
     </div>
