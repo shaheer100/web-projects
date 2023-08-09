@@ -53,6 +53,8 @@ const postsSchema = new mongoose.Schema ({
 });
 
 const usersSchema = new mongoose.Schema ({
+  displayName: String,
+  aboutMe: String,
   username: String,
   Password: String,
 });
@@ -94,18 +96,20 @@ app.get("/register", (req, res) => {
 
 app.post("/register", async (req, res) => {
   const newUser = new User({
+    displayName: req.body.displayName,
+    aboutMe: req.body.aboutMe,
     username: req.body.username,
     Password: req.body.password,
   });
 
   // register user using parameters entered
-  User.register(newUser, req.body.password , function(err,user){
+  User.register(newUser, req.body.password , (err, user) => {
     if (err) {
       console.log(err); res.redirect("/register");
     }
-    else{
+    else {
       console.log(user + "2");
-      passport.authenticate("local")(req,res,function(){
+      passport.authenticate("local")(req, res, () => {
         res.redirect("/");
       })
     }
@@ -223,9 +227,25 @@ app.get("/users/:userID", async (req, res) => {
   console.log(auth);
   const address = req.url;
 
+  let postsWithSpecificUser;
+  try {
+    postsWithSpecificUser = await Post.find({ user: userID });
+  } catch (err) {
+    console.error("Error finding specified user's posts:", err);
+    res.status(500).send("Error finding specified user's posts.");
+    return;
+  }
+
   try {
     const requestedUser = await User.findOne({ _id: req.user._id });
-    res.render("user.ejs", { username: requestedUser.username, address: address, auth: auth, userID: userID });
+    res.render("user.ejs", { 
+      username: requestedUser.displayName, 
+      aboutMe: requestedUser.aboutMe, 
+      address: address, 
+      auth: auth, 
+      userID: userID,
+      posts: postsWithSpecificUser,
+    });
   } catch (err) {
     console.error("Error finding specified user:", err);
     res.status(500).send("Error finding specified user.");
