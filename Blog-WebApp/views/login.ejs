@@ -18,6 +18,11 @@
               </div>
               <button type="submit" class="btn btn-dark">Login</button>
               <p>Need an account? <a href="/register">Register</a></p>
+              <% if (locals.error) { %>
+                <div class="error-message">
+                  <p><%= error %></p>
+                </div>
+              <% } %>
             </form>
           </div>
         </div>

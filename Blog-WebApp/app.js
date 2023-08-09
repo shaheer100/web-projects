@@ -98,6 +98,7 @@ app.post("/register", async (req, res) => {
     Password: req.body.password,
   });
 
+  // register user using parameters entered
   User.register(newUser, req.body.password , function(err,user){
     if (err) {
       console.log(err); res.redirect("/register");
@@ -123,13 +124,32 @@ app.get("/login", (req, res) => {
   res.render("login.ejs", { address: address, auth: auth, userID: userID });
 });
 
-app.post("/login", passport.authenticate("local", {
-  successRedirect: "/",
-  failureRedirect: "/login",
-}));
+app.post("/login", (req, res, next) => {
+  passport.authenticate("local", (err, user, info) => {
+    if (err) {
+      return next(err);
+    }
+
+    if (!user) {
+      // Authentication failed, render login page with error message
+      return res.render("login", { address: "/login", auth: false, userID: "", error: "Incorrect username or password." });
+    }
+
+    // Authentication succeeded, log in user
+    req.logIn(user, (err) => {
+      if (err) {
+        return next(err);
+      }
+      return res.redirect("/"); 
+    });
+  })(req, res, next);
+});
+
 
 app.get("/logout", (req, res) => {
   auth = false;
+
+  // log out user, cookie is no longer present
   req.logout((err) => {
     if (err) {
       console.error("Logout error:", err);
