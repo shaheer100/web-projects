@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-import express from "express";
+import express, { request } from "express";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import _ from "lodash";
@@ -7,9 +7,14 @@ import ejs from "ejs";
 import session from "express-session";
 import passport from "passport";
 import passportLocalMongoose from "passport-local-mongoose";
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+import findOrCreate from "mongoose-findorcreate";
+import FacebookStrategy from "passport-facebook";
+
+dotenv.config();
 
 let auth = false;
-let userID = "";
+let userID = "123";
 
 // getting the formatted date (Month day, year)
 const currentDate = new Date();
@@ -25,7 +30,6 @@ const formattedDate = `${month} ${day}, ${year}`;
 const app = express();
 app.set('view engine', 'ejs');
 app.use(express.static("public")); 
-app.use(bodyParser.urlencoded({ extended: true }));
 
 // use the session package, setting it up with initial configurations
 app.use(session({
@@ -33,6 +37,8 @@ app.use(session({
   resave: false,
   saveUninitialized: false
 }));
+
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // use and initialize passport packages, and use passport for managing those sessions
 app.use(passport.initialize());
@@ -56,11 +62,12 @@ const usersSchema = new mongoose.Schema ({
   displayName: String,
   aboutMe: String,
   username: String,
-  Password: String,
+  password: String,
 });
 
 // used to hash + salt passwords, and save users into MongoDB database
 usersSchema.plugin(passportLocalMongoose); 
+usersSchema.plugin(findOrCreate);
 
 // mongoose models
 const Post = new mongoose.model("Post", postsSchema); 
@@ -69,29 +76,113 @@ const User = new mongoose.model("User", usersSchema);
 passport.use(User.createStrategy());
 
 passport.serializeUser(function(user, done) {
-  done(null, user);
+  done(null, user.id); 
 });
 
-passport.deserializeUser((id, done) => {
-  User.findById(id)
-    .then(user => {
-      done(null, user);
-    })
-    .catch(err => {
-      done(err, null);
-    });
+passport.deserializeUser(async function(id, done) {
+  try {
+    const user = await User.findById(id);
+    done(null, user);
+  } catch (err) {
+    done(err, null);
+  }
+});
+
+// Facebook OAuth setup
+passport.use(new FacebookStrategy({
+  clientID: process.env.FACEBOOK_APP_ID,
+  clientSecret: process.env.FACEBOOK_APP_SECRET,
+  callbackURL: "http://localhost:3000/auth/facebook/callback"
+}, 
+async function(accessToken, refreshToken, profile, cb) {
+  const displayName = profile.displayName;
+  const username = profile.id;
+
+  try {
+    // Check if a user with the same username already exists
+    const existingUser = await User.findOne({ username });
+
+    if (existingUser) {
+      // User already exists, return the existing user
+      return cb(null, existingUser);
+    } else {
+      // Create a new user
+      const newUser = new User({
+        username,
+        displayName,
+      });
+
+      const savedUser = await newUser.save();
+      return cb(null, savedUser);
+    }
+  } catch (err) {
+    return cb(err, null);
+  }
+}
+));
+
+// Google OAuth 2.0 setup
+passport.use(new GoogleStrategy({
+  clientID: process.env.CLIENT_ID,
+  clientSecret: process.env.CLIENT_SECRET,
+  callbackURL: "http://localhost:3000/auth/google/callback",
+  userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo"
+},
+async function(accessToken, refreshToken, profile, cb) {
+  const displayName = profile.displayName;
+  const username = profile.id;
+
+  try {
+    // Check if a user with the same username already exists
+    const existingUser = await User.findOne({ username });
+
+    if (existingUser) {
+      // User already exists, return the existing user
+      return cb(null, existingUser);
+    } else {
+      // Create a new user
+      const newUser = new User({
+        username,
+        displayName,
+      });
+
+      const savedUser = await newUser.save();
+      return cb(null, savedUser);
+    }
+  } catch (err) {
+    return cb(err, null);
+  }
+}
+));
+
+app.get("/auth/facebook", passport.authenticate("facebook", { scope: "email" }));
+
+app.get("/auth/google", passport.authenticate("google", { scope: ["profile"] }));
+
+app.get("/auth/facebook/callback",
+  passport.authenticate("facebook", { failureRedirect: "/login" }),
+  function(req, res) {
+    // Successful authentication, redirect home.
+    res.redirect('/');
+});
+
+app.get("/auth/google/callback", 
+  passport.authenticate("google", { failureRedirect: "/login" }),
+  function(req, res) {
+    // Successful authentication, redirect home.
+    res.redirect("/");
 });
 
 app.get("/register", (req, res) => {
-  if (req.isAuthenticated()) {
-    auth = true;
-    userID = auth ? req.user._id : "";
-  }
-
-  console.log(auth);
+  auth = req.isAuthenticated();
+  userID = auth ? req.user._id : "123";
   const address = req.url;
 
-  res.render("register.ejs", { address: address, auth: auth, userID: userID });
+  res.render("register.ejs", { 
+    address: address, 
+    auth: auth, 
+    userID: userID 
+  });
 });
 
 app.post("/register", async (req, res) => {
@@ -99,16 +190,23 @@ app.post("/register", async (req, res) => {
     displayName: req.body.displayName,
     aboutMe: req.body.aboutMe,
     username: req.body.username,
-    Password: req.body.password,
+    password: req.body.password,
   });
 
   // register user using parameters entered
   User.register(newUser, req.body.password , (err, user) => {
-    if (err) {
-      console.log(err); res.redirect("/register");
+    if (err) { 
+      // if unsuccessful, log errors and refresh page and display error
+      console.log(err); 
+      res.render("register", { 
+        address: "/register", 
+        auth: false, 
+        userID: "123", 
+        error: err 
+      });
     }
-    else {
-      console.log(user + "2");
+    else { 
+      // successful registration
       passport.authenticate("local")(req, res, () => {
         res.redirect("/");
       })
@@ -117,29 +215,40 @@ app.post("/register", async (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  if (req.isAuthenticated()) {
-    auth = true;
-    userID = auth ? req.user._id : "";
-  }
-
-  console.log(auth);
+  auth = req.isAuthenticated();
+  userID = auth ? req.user._id : "123";
   const address = req.url;
 
-  res.render("login.ejs", { address: address, auth: auth, userID: userID });
+  res.render("login.ejs", { 
+    address: address, 
+    auth: auth, 
+    userID: userID 
+  });
 });
 
 app.post("/login", (req, res, next) => {
   passport.authenticate("local", (err, user, info) => {
     if (err) {
-      return next(err);
+      // Handle the error by rendering the login page with an error message
+      return res.render("login", {
+        address: "/login",
+        auth: false,
+        userID: "123",
+        error: "An error occurred during authentication. Please try again."
+      });
     }
 
     if (!user) {
       // Authentication failed, render login page with error message
-      return res.render("login", { address: "/login", auth: false, userID: "", error: "Incorrect username or password." });
+      return res.render("login", { 
+        address: "/login", 
+        auth: false, 
+        userID: "123", 
+        error: "Incorrect username or password." 
+      });
     }
 
-    // Authentication succeeded, log in user
+    // Authentication succeeded, log in user and redirect to root (home page) route
     req.logIn(user, (err) => {
       if (err) {
         return next(err);
@@ -164,32 +273,36 @@ app.get("/logout", (req, res) => {
 });
 
 app.get("/compose", (req, res) => {
-  if (req.isAuthenticated()) {
-    auth = true;
-    userID = auth ? req.user._id : "";
-  }
-
-  console.log(auth);
+  auth = req.isAuthenticated();
+  userID = auth ? req.user._id : "123";
   const address = req.url;
 
-  if (req.isAuthenticated()) {
-    res.render("compose.ejs", { address: address, auth: auth, userID: userID });
+  // can't go to compose page unless you are authorized (signed in)
+  if (auth) {
+    res.render("compose.ejs", { 
+      address: address, 
+      auth: auth, 
+      userID: userID 
+    });
   } else {
-    res.render("login.ejs", { address: address, auth: auth, userID: userID });
+    res.render("login.ejs", { 
+      address: address, 
+      auth: auth, 
+      userID: userID 
+    });
   }
 });
 
 app.post("/compose", async (req, res) => {
-  const postTitle = req.body.postTitle;
-  const postContent = req.body.postBody;
-
+  // create a newPost by the data that is entered / retrieved
   const post = new Post({
     user: req.user._id,
-    title: postTitle,
-    body: postContent,
-    date: formattedDate
+    title: req.body.postTitle,
+    body: req.body.postBody,
+    date: formattedDate,
   });
   
+  // save that post into database under the user's name
   try {
     await post.save();
     res.redirect("/");
@@ -200,18 +313,24 @@ app.post("/compose", async (req, res) => {
 });
 
 app.get("/posts/:postID", async (req, res) => {
-  if (req.isAuthenticated()) {
-    auth = true;
-    userID = auth ? req.user._id : "";
-  }
-
-  console.log(auth);
+  auth = req.isAuthenticated();
+  userID = auth ? req.user._id : "123";
   const address = req.url;
-
   const postID = req.params.postID;
+  
   try {
-    const requestedPost = await Post.findOne({ _id: postID });
-    res.render("post.ejs", { title: requestedPost.title, body: requestedPost.body, address: address, date: requestedPost.date, auth: auth, userID: userID });
+    // find the post and render post.ejs
+    const requestedPost = await Post.findOne({ _id: postID }).populate("user");
+    res.render("post.ejs", { 
+      title: requestedPost.title, 
+      body: requestedPost.body, 
+      address: address, 
+      date: requestedPost.date, 
+      auth: auth, 
+      userID: userID,
+      postuserID: requestedPost.user._id,
+      displayName: requestedPost.user.displayName,
+    });
   } catch (err) {
     console.error("Error finding specified post:", err);
     res.status(500).send("Error finding specified post.");
@@ -219,27 +338,30 @@ app.get("/posts/:postID", async (req, res) => {
 });
 
 app.get("/users/:userID", async (req, res) => {
-  if (req.isAuthenticated()) {
-    auth = true;
-    userID = auth ? req.user._id : "";
-  }
-
-  console.log(auth);
+  auth = req.isAuthenticated();
   const address = req.url;
+  userID = req.user._id; // logged in user id
+  const requestedUserID = req.params.userID; // the user that was requested
 
+  // if not authorized (signed in) then redirect to login
+  if (!auth) {
+    return res.render("login", { address: "/login", auth: false, userID: "123", });
+  }
+  
+  // find all posts under the requested user's ID
   let postsWithSpecificUser;
   try {
-    postsWithSpecificUser = await Post.find({ user: userID });
+    postsWithSpecificUser = await Post.find({ user: requestedUserID }).populate("user");
   } catch (err) {
     console.error("Error finding specified user's posts:", err);
     res.status(500).send("Error finding specified user's posts.");
-    return;
   }
-
+  
+  // finding that user and rendering user.ejs
   try {
-    const requestedUser = await User.findOne({ _id: req.user._id });
+    const requestedUser = await User.findOne({ _id: requestedUserID });
     res.render("user.ejs", { 
-      username: requestedUser.displayName, 
+      displayName: requestedUser.displayName, 
       aboutMe: requestedUser.aboutMe, 
       address: address, 
       auth: auth, 
@@ -253,17 +375,19 @@ app.get("/users/:userID", async (req, res) => {
 });
 
 app.get("/", async (req, res) => {
-  if (req.isAuthenticated()) {
-    auth = true;
-    userID = auth ? req.user._id : "";
-  }
-
-  console.log(auth);
+  auth = req.isAuthenticated();
+  userID = auth ? req.user._id : "123";
   const address = req.url;
   
+  // finding all posts and displaying them in the home page (rendering home.ejs)
   try {
-    const posts = await Post.find({});
-    res.render("home.ejs", { address: address, posts: posts, auth: auth, userID: userID });
+    const posts = await Post.find({}).populate("user");
+    res.render("home.ejs", { 
+      address: address, 
+      posts: posts, 
+      auth: auth, 
+      userID: userID 
+    });
   } catch (err) {
     console.error("Error loading posts:", err);
     res.status(500).send("Error loading posts.");

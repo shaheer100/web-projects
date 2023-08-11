@@ -4,7 +4,7 @@
     <div class="p-4 p-md-5 mb-4 rounded text-body-emphasis bg-body-secondary">
       <div class="row">
           <div class="col-lg-6 order-lg-2">
-            <p class="lead my-3 text-end">ONCE I AM DONE I NEED TO EXPLAIN THE KEY THINGS THAT I WORKED ON FOR THIS PROJECT!!</p>
+            <p class="lead my-3 text-end">Full-stack web app: Secure blogging & social platform with advanced DB interactions.</p>
           </div>
           <div class="col-lg-6 order-lg-1">
             <h1 class="display-4 fst-italic">Welcome to my Blog Web App!</h1>
@@ -21,7 +21,7 @@
             <% posts.forEach(post => { %>
               <article class="blog-post">
                 <h2 class="display-5 link-body-emphasis mb-1"><%= post.title %></h2>
-                <p class="blog-post-meta"><%= post.date %> by <a href="/users<%= userID %>"><%= post.user.username %></a></p>
+                <p class="blog-post-meta"><%= post.date %> by <%= post.user.displayName %></p>
                 <p>
                   <% if (post.body.length <= 100) { %>
                   <%= post.body %>
@@ -44,7 +44,7 @@
             <div class="p-4">
               <h4 class="fst-italic">Elsewhere</h4>
               <ol class="list-unstyled">
-                <li><a href="https://github.com/shaheer100/web-projects/tree/main/todolist-WebApp">GitHub</a></li>
+                <li><a href="https://github.com/shaheer100/web-projects/tree/main/Blog-WebApp">GitHub</a></li>
                 <li><a href="https://www.linkedin.com/in/shaheer-sheeraz-7648001a9/">LinkedIn</a></li>
                 <li><a href="mailto:ssheeraz@uwaterloo.ca">Email</a></li>
               </ol>

@@ -1,11 +1,11 @@
 <%- include("partials/header.ejs") %>
 
     <div class="container mt-5">
-        <h2><%= username %></h2>
+        <h2><%= displayName %></h2>
         <p><%= aboutMe %></p>
         <div class="row g-5 userPosts">
             <div class="col-md-8">
-                <h3 class="pb-4 mb-4 fst-italic border-bottom">
+                <h3 class="pb-4 mb-4 fst-italic border-bottom border-top">
                     Recent Blog Posts
                 </h3>
                 <% if (posts.length === 0) { %>
@@ -14,7 +14,7 @@
                     <% posts.forEach(post => { %>
                         <article class="blog-post">
                             <h2 class="display-5 link-body-emphasis mb-1"><%= post.title %></h2>
-                            <p class="blog-post-meta"><%= post.date %> by <%= post.user.username %>></p>
+                            <p class="blog-post-meta"><%= post.date %> by <%= post.user.displayName %></p>
                             <p>
                             <% if (post.body.length <= 100) { %>
                             <%= post.body %>
