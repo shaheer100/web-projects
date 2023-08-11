@@ -394,7 +394,12 @@ app.get("/", async (req, res) => {
   }
 });
 
+let port = process.env.PORT;
+if (port == null || port == "") {
+  port = 3000;
+}
+
 // Start the server
-app.listen(3000, () => {
-  console.log("Server started on http://localhost:3000");
+app.listen(port, () => {
+  console.log("Server has started successfully.");
 });
