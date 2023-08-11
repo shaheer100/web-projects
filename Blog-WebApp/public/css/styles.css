@@ -99,6 +99,7 @@ textarea {
 .error-message {
   color: red;
   font-size: 14px;
+  margin: 0%;
 }
 
 .userPosts {
@@ -107,4 +108,22 @@ textarea {
 
 .register {
   margin-bottom: 10px;
+}
+
+.fa {
+  margin-right: 10px;
+}
+
+.card {
+  margin-bottom: 20px;
+}
+
+.card-body {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.pb-4 {
+  padding-top: 24px;
 }
