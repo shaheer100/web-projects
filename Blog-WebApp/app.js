@@ -92,7 +92,7 @@ passport.deserializeUser(async function(id, done) {
 passport.use(new FacebookStrategy({
   clientID: process.env.FACEBOOK_APP_ID,
   clientSecret: process.env.FACEBOOK_APP_SECRET,
-  callbackURL: "https://tranquil-refuge-72579-fc6e345421ae.herokuapp.com/auth/google/callback"
+  callbackURL: "https://tranquil-refuge-72579-fc6e345421ae.herokuapp.com/auth/facebook/callback"
 }, 
 async function(accessToken, refreshToken, profile, cb) {
   const displayName = profile.displayName;
