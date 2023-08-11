@@ -92,7 +92,7 @@ passport.deserializeUser(async function(id, done) {
 passport.use(new FacebookStrategy({
   clientID: process.env.FACEBOOK_APP_ID,
   clientSecret: process.env.FACEBOOK_APP_SECRET,
-  callbackURL: "http://localhost:3000/auth/facebook/callback"
+  callbackURL: "https://tranquil-refuge-72579-fc6e345421ae.herokuapp.com/auth/google/callback"
 }, 
 async function(accessToken, refreshToken, profile, cb) {
   const displayName = profile.displayName;
@@ -125,7 +125,7 @@ async function(accessToken, refreshToken, profile, cb) {
 passport.use(new GoogleStrategy({
   clientID: process.env.CLIENT_ID,
   clientSecret: process.env.CLIENT_SECRET,
-  callbackURL: "http://localhost:3000/auth/google/callback",
+  callbackURL: "https://tranquil-refuge-72579-fc6e345421ae.herokuapp.com/auth/google/callback",
   userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo"
 },
 async function(accessToken, refreshToken, profile, cb) {
