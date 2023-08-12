@@ -92,7 +92,7 @@ passport.deserializeUser(async function(id, done) {
 passport.use(new FacebookStrategy({
   clientID: process.env.FACEBOOK_APP_ID,
   clientSecret: process.env.FACEBOOK_APP_SECRET,
-  callbackURL: "https://tranquil-refuge-72579-fc6e345421ae.herokuapp.com/auth/facebook/callback"
+  callbackURL: "https://blogtoday-358bc2e83982.herokuapp.com/auth/facebook/callback"
 }, 
 async function(accessToken, refreshToken, profile, cb) {
   const displayName = profile.displayName;
@@ -125,7 +125,7 @@ async function(accessToken, refreshToken, profile, cb) {
 passport.use(new GoogleStrategy({
   clientID: process.env.CLIENT_ID,
   clientSecret: process.env.CLIENT_SECRET,
-  callbackURL: "https://tranquil-refuge-72579-fc6e345421ae.herokuapp.com/auth/google/callback",
+  callbackURL: "https://blogtoday-358bc2e83982.herokuapp.com/auth/google/callback",
   userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo"
 },
 async function(accessToken, refreshToken, profile, cb) {
@@ -312,8 +312,8 @@ app.post("/compose", async (req, res) => {
   }
 });
 
-app.post("delete", async(req, res) => {
-  const postToDelete = req.user._id;
+app.post("/delete/:postID", async(req, res) => {
+  const postToDelete = req.params.postId;
 
   try {
     await Post.findByIDAndRemove(postToDelete);
@@ -321,6 +321,26 @@ app.post("delete", async(req, res) => {
   } catch (err) {
     console.error("Error in deleting item:", err);
     res.status(500).send("Error deleting item.");
+  }
+});
+
+app.put("/edit/:postID", async (req, res) => {
+  const postId = req.params.postId;
+  const updatedPostData = {
+    title: req.body.postTitle,
+    body: req.body.postBody,
+  };
+  try {
+    // Find the post by its ID and update its data
+    const updatedPost = await Post.findByIdAndUpdate(postId, updatedPostData, { new: true });
+
+    if (!updatedPost) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+
+  } catch (error) {
+    console.error('Error updating post:', error);
+    res.status(500).send({ message: 'Error updating post' });
   }
 });
 
@@ -342,6 +362,7 @@ app.get("/posts/:postID", async (req, res) => {
       userID: userID,
       postuserID: requestedPost.user._id,
       displayName: requestedPost.user.displayName,
+      postID: postID,
     });
   } catch (err) {
     console.error("Error finding specified post:", err);
