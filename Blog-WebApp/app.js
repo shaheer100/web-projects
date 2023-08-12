@@ -312,9 +312,21 @@ app.post("/compose", async (req, res) => {
   }
 });
 
+app.post("delete", async(req, res) => {
+  const postToDelete = req.user._id;
+
+  try {
+    await Post.findByIDAndRemove(postToDelete);
+    res.redirect("/");
+  } catch (err) {
+    console.error("Error in deleting item:", err);
+    res.status(500).send("Error deleting item.");
+  }
+});
+
 app.get("/posts/:postID", async (req, res) => {
   auth = req.isAuthenticated();
-  userID = auth ? req.user._id : "123";
+  userID = auth ? req.user._id : "123"; // signed in User
   const address = req.url;
   const postID = req.params.postID;
   

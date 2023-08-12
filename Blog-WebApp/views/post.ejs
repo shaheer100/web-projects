@@ -3,13 +3,18 @@
     <div class="container-wrapper">
         <main class="container">
             <div class="card">
-                <div class="card-body">
-                    <div class="row g-5">
-                        <h2><%= title %></h2>
-                        <p class="blog-post-meta postTitle"><%= date %> by <a href="/users/<%= postuserID %>"><%= displayName %></a></p>
-                        <p class="postBody"><%= body %></p>
+                <form action="/delete" method="POST">
+                    <div class="card-body">
+                        <div class="row g-5">
+                            <h2><%= title %></h2>
+                            <p class="blog-post-meta postTitle"><%= date %> by <a href="/users/<%= postuserID %>"><%= displayName %></a></p>
+                            <p class="postBody"><%= body %></p>
+                        </div>
+                        <% if (userID === postuserID) { %>
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this post?')">Delete</button>                         
+                        <% } %>
                     </div>
-                </div>
+                </form>
             </div>
         </main>
     </div>
