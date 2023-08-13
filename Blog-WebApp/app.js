@@ -312,11 +312,11 @@ app.post("/compose", async (req, res) => {
   }
 });
 
-app.post("/delete/:postID", async(req, res) => {
-  const postToDelete = req.params.postId;
+app.post("/delete/:postID", async (req, res) => {
+  const postToDelete = req.params.postID;
 
   try {
-    await Post.findByIDAndRemove(postToDelete);
+    await Post.findByIdAndDelete(postToDelete);
     res.redirect("/");
   } catch (err) {
     console.error("Error in deleting item:", err);
@@ -324,20 +324,21 @@ app.post("/delete/:postID", async(req, res) => {
   }
 });
 
-app.put("/edit/:postID", async (req, res) => {
-  const postId = req.params.postId;
+app.post("/edit/:postID", async (req, res) => {
+  const postID = req.params.postID;
   const updatedPostData = {
     title: req.body.postTitle,
     body: req.body.postBody,
   };
   try {
     // Find the post by its ID and update its data
-    const updatedPost = await Post.findByIdAndUpdate(postId, updatedPostData, { new: true });
+    const updatedPost = await Post.findByIdAndUpdate(postID, updatedPostData, { new: true });
 
     if (!updatedPost) {
       return res.status(404).json({ message: 'Post not found' });
     }
 
+    res.redirect("/");
   } catch (error) {
     console.error('Error updating post:', error);
     res.status(500).send({ message: 'Error updating post' });
@@ -373,18 +374,19 @@ app.get("/posts/:postID", async (req, res) => {
 app.get("/users/:userID", async (req, res) => {
   auth = req.isAuthenticated();
   const address = req.url;
-  userID = req.user._id; // logged in user id
-  const requestedUserID = req.params.userID; // the user that was requested
 
   // if not authorized (signed in) then redirect to login
   if (!auth) {
     return res.render("login", { address: "/login", auth: false, userID: "123", });
   }
+
+  userID = req.user._id; // logged in user id
+  const requestedUserID = req.params.userID; // the user that was requested
   
   // find all posts under the requested user's ID
   let postsWithSpecificUser;
   try {
-    postsWithSpecificUser = await Post.find({ user: requestedUserID }).populate("user");
+    postsWithSpecificUser = await Post.find({ user: requestedUserID }).sort({ date: -1 }).populate("user");
   } catch (err) {
     console.error("Error finding specified user's posts:", err);
     res.status(500).send("Error finding specified user's posts.");
@@ -414,7 +416,8 @@ app.get("/", async (req, res) => {
   
   // finding all posts and displaying them in the home page (rendering home.ejs)
   try {
-    const posts = await Post.find({}).populate("user");
+    // Fetch all posts from the database, sort by date in descending order, and populate the "user" field
+    const posts = await Post.find({}).sort({ date: -1 }).populate("user");
     res.render("home.ejs", { 
       address: address, 
       posts: posts, 

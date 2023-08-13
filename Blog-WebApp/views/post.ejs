@@ -7,21 +7,23 @@
                 <div class="card-body">
                     <div class="row g-5">
                         <h2><%= title %></h2>
-                        <p class="blog-post-meta postTitle"><%= date %> by <a href="/users/<%= postuserID %>"><%= displayName %></a></p>
-                        <p class="postBody"><%= body %></p>
+                        <p class="blog-post-meta postTitle"><%= date %> by <a href="<%= auth ? "/users/" + postuserID : "/login" %>"><%= displayName %></a></p>
+                        <div class="postBody">
+                            <%= body %>
+                        </div>
                     </div>
-                    <% if (userID === postuserID) { %>
+                    <% if (postuserID.toString() === userID.toString()) { %>
                         <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this post?')">Delete</button>
                     <% } %>               
                 </div>
             </form>
         </div>
         
-        <% if (userID === postuserID) { %>
+        <% if (postuserID.toString() === userID.toString()) { %>
             <div class="card mt-4">
                 <div class="card-body">
                     <h3>Edit Post</h3>
-                    <form action="/edit/<%= postID %>" method="PUT">
+                    <form action="/edit/<%= postID %>" method="POST">
                         <div class="mb-3">
                             <label for="title" class="form-label">Title</label>
                             <input type="text" class="form-control" id="title" name="postTitle" value="<%= title %>">
