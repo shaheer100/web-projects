@@ -14,4 +14,4 @@ I believe in the power of technology to bring people together. By combining tech
 🌱 **Continual Learning and Future Projects**
 I'm committed to lifelong learning and expanding my horizons. Beyond this project, I'm eager to dive into new technologies, frameworks, and programming languages. I'm excited to tackle more ambitious projects that challenge me to think outside the box.
 
-Can be accessed at: https://tranquil-refuge-72579-fc6e345421ae.herokuapp.com
+Can be accessed at: https://blogtoday-358bc2e83982.herokuapp.com
