@@ -129,3 +129,27 @@ footer {
 footer p {
   margin: 0;
 }
+
+.dropdown-menu {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 10px; 
+  background-color: #f0f0f0;
+  color: #003366; 
+  border-radius: 5px; 
+}
+
+.dropdown-menu select {
+  background-color: #003366;
+  color: #fff;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  outline: none;
+}
+
+.dropdown-menu select option {
+  background-color: #003366;
+  color: #fff;
+}

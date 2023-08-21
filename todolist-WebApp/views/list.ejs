@@ -1,26 +1,34 @@
 <%- include("header") -%>
 
-  <div class="box" id="heading">
-    <h1> <%= date %> </h1>
-    <h1> <%= listTitle %> </h1>
+<div class="box" id="heading">
+  <div class="dropdown-menu">
+    <form id="list-select-form" action="/" method="post">
+      <select name="list" onchange="this.form.submit()">
+        <option value="main-list" <%= selectedList === "Main" ? "selected" : "" %>>Main List</option>
+        <% allLists.forEach(list => { %>
+          <option value="<%= list.name %>" <%= list.name === selectedList ? "selected" : "" %>><%= list.name %></option>
+        <% }); %>
+      </select>
+    </form>
   </div>
-  
-  <div class="box">
+  <h1> <%= date %> </h1>
+</div>
 
-    <% newListItems.forEach(item => {  %>
-      <form action="/delete" method="POST">
-        <div class="item">
-          <input type="checkbox" onchange="this.form.submit()" name="deleteItem" value="<%= item._id %>"> 
-          <p><%= item.name %></p>
-          <input type="hidden" name="listName" value="<%= listTitle %>">
-        </div>
-      </form>
-      <% }); %>
+<div class="box">
+  <% newListItems.forEach(item => {  %>
+    <form action="/delete" method="POST">
+      <div class="item">
+        <input type="checkbox" onchange="this.form.submit()" name="deleteItem" value="<%= item._id %>"> 
+        <p><%= item.name %></p>
+        <input type="hidden" name="listName" value="<%= listTitle %>">
+      </div>
+    </form>
+  <% }); %>
 
-      <form class="item" action="/" method="post">
-        <input type="text" name="newItem" placeholder="New Item" autocomplete="off">
-        <button type="submit" name="list" value="<%= listTitle %>">+</button>
-      </form>
-  </div>
+  <form class="item" action="/" method="post">
+    <input type="text" name="newItem" placeholder="New Item" autocomplete="off">
+    <button type="submit" name="list" value="<%= listTitle %>">+</button>
+  </form>
+</div>
 
 <%- include("footer") -%>

@@ -65,23 +65,44 @@ app.get("/", async (req, res) =>  {
     console.error("Database connection error:", error);
   });
 
-  // tap into model and find everything in the items collection
-  // will display the default items ensuring they don't stack
-  // render the items that are present in the database
   try {
-    const foundItems = await Item.find({});
+
+    let allLists;
+    const selectedList = "Main";
+    let foundItems;
+
+    try {
+      allLists = await List.find({}, "name"); // only find the names of the lists
+    } catch (err) {
+      console.error("Error fetching lists:", err);
+      res.status(500).send("Error fetching lists.");
+    }
+
+    try {
+      foundItems = await Item.find({}); // find items for the main page
+    } catch (err) {
+      console.error("Error finding items:", err);
+      res.status(500).send("Error finding items.");
+    }
+    
     if (foundItems.length === 0 && firstTime) {
       try {
         await Item.insertMany(defaultItems);
         console.log("Default items inserted successfully:");
         firstTime = true;
       } catch (err) {
-        console.error("Error adding defeault items:", err);
+        console.error("Error adding default items:", err);
         res.status(500).send("Error adding default items.");
       }
       res.redirect("/");
     } else {
-      res.render("list", { date: formattedDate, newListItems: foundItems, listTitle: "Main" });
+      res.render("list", {
+        date: formattedDate,
+        newListItems: foundItems,
+        listTitle: "Main",
+        allLists: allLists,
+        selectedList: selectedList,
+      });
     }
   } catch (err) {
     console.error("Error fetching items:", err);
@@ -109,7 +130,11 @@ app.get("/:listName", async (req, res) => {
         res.status(500).send("Error saving item.");
       }
     } else {
-      res.render("list", { date: formattedDate, newListItems: foundList.items, listTitle: listName });
+      res.render("list", { 
+        date: formattedDate, 
+        newListItems: foundList.items, 
+        listTitle: listName 
+      });
     }
     
   } catch (err) {
@@ -125,26 +150,42 @@ app.post("/", async (req, res) => {
   const item = new Item({
     name: itemName
   });
+  
+  try {
 
-  if (listName === "Main") {
-    // after we save our item, we redirect so that we can FIND all items and render them on screen
+    let allLists;
+    const selectedList = listName;
+
     try {
-      await item.save();
-      res.redirect("/");
+      allLists = await List.find({}, "name"); 
     } catch (err) {
-      console.error("Error saving item:", err);
-      res.status(500).send("Error saving item.");
+      console.error("Error fetching lists:", err);
+      res.status(500).send("Error fetching lists.");
     }
-  } else {
-    try {
-      const foundList = await List.findOne({ name: listName });
-      foundList.items.push(item);
-      await foundList.save();
-      res.redirect("/" + listName);
-    } catch (err) {
-      console.error("Error while accessing database:", err);
-      res.status(500).send("Error while accessing database.");
+    
+    if (listName === "Main") {
+      // after we save our item, we redirect so that we can FIND all items and render them on screen
+      try {
+        await item.save();
+        res.redirect("/");
+      } catch (err) {
+        console.error("Error saving item:", err);
+        res.status(500).send("Error saving item.");
+      }
+    } else {
+      try {
+        const foundList = await List.findOne({ name: listName });
+        foundList.items.push(item);
+        await foundList.save();
+        res.redirect("/" + listName);
+      } catch (err) {
+        console.error("Error while accessing database:", err);
+        res.status(500).send("Error while accessing database.");
+      }
     }
+  } catch (err) {
+    console.error("Error fetching lists:", err);
+    res.status(500).send("Error fetching lists.");
   }
 });
 
