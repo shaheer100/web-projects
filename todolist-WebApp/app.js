@@ -10,6 +10,17 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static("public"));
 
+// formatted date for the title of the todo list
+const currentDate = new Date();
+const options = {
+  weekday: "long", 
+  day: "numeric",
+  month: "long", 
+  year: "numeric"
+};
+
+const formattedDate = currentDate.toLocaleDateString(undefined, options);
+
 // creating a new database
 mongoose.connect("mongodb+srv://admin-shaheer:Test123@cluster0.p7p6tvn.mongodb.net/listDB");
 
@@ -47,16 +58,6 @@ const List = mongoose.model("List", listsSchema);
 const firstTime = false;
 
 app.get("/", async (req, res) =>  {
-  const currentDate = new Date();
-  const options = {
-    weekday: "long", 
-    day: "numeric",
-    month: "long", 
-    year: "numeric"
-  };
-
-  const formattedDate = currentDate.toLocaleDateString(undefined, options);
-
   // error handling
   const db = mongoose.connection;
   
@@ -169,10 +170,6 @@ app.post("/delete", async (req, res) => {
       res.status(500).send("Error deleting item from list.");
     }
   }
-});
-
-app.get("/about", (req, res) => {
-  res.render("about");
 });
 
 let port = process.env.PORT;
