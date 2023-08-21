@@ -1,15 +1,8 @@
 <%- include("header") -%>
 
 <div class="box" id="heading">
-  <div class="dropdown-menu">
-    <form id="list-select-form" action="/" method="post">
-      <select name="list" onchange="this.form.submit()">
-        <option value="main-list" <%= selectedList === "Main" ? "selected" : "" %>>Main List</option>
-        <% allLists.forEach(list => { %>
-          <option value="<%= list.name %>" <%= list.name === selectedList ? "selected" : "" %>><%= list.name %></option>
-        <% }); %>
-      </select>
-    </form>
+  <div class="list-name">
+    <h1><%= listTitle %></h1>
   </div>
   <h1> <%= date %> </h1>
 </div>
@@ -29,6 +22,20 @@
     <input type="text" name="newItem" placeholder="New Item" autocomplete="off">
     <button type="submit" name="list" value="<%= listTitle %>">+</button>
   </form>
+</div>
+
+<div class="box">
+  <h2>Available Lists:</h2>
+  <ul>
+    <li><a href="/">Main</a></li>
+    <% allLists.forEach(list => { %>
+      <li><a href="/<%= list.name %>"><%= list.name %></a></li>
+    <% }); %>
+    <form id="new-list-form" action="/" method="post">
+      <input type="text" name="newListName" placeholder="Enter new list name" autocomplete="off">
+      <button type="submit">+</button>
+    </form>
+  </ul>
 </div>
 
 <%- include("footer") -%>

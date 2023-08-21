@@ -58,19 +58,11 @@ const List = mongoose.model("List", listsSchema);
 const firstTime = false;
 
 app.get("/", async (req, res) =>  {
-  // error handling
-  const db = mongoose.connection;
+
+  let allLists;
+  let foundItems;
   
-  db.on("error", (error) => {
-    console.error("Database connection error:", error);
-  });
-
   try {
-
-    let allLists;
-    const selectedList = "Main";
-    let foundItems;
-
     try {
       allLists = await List.find({}, "name"); // only find the names of the lists
     } catch (err) {
@@ -101,7 +93,6 @@ app.get("/", async (req, res) =>  {
         newListItems: foundItems,
         listTitle: "Main",
         allLists: allLists,
-        selectedList: selectedList,
       });
     }
   } catch (err) {
@@ -113,6 +104,14 @@ app.get("/", async (req, res) =>  {
 // using express route parameters to make multiple lists 
 app.get("/:listName", async (req, res) => {
   const listName = _.lowerCase(req.params.listName);
+  let allLists;
+
+  try {
+    allLists = await List.find({}, "name"); 
+  } catch (err) {
+    console.error("Error fetching lists:", err);
+    res.status(500).send("Error fetching lists.");
+  }
 
   try {
     const foundList = await List.findOne({ name: listName });
@@ -120,7 +119,7 @@ app.get("/:listName", async (req, res) => {
     if (!foundList) {
       const list = new List({
         name: listName,
-        items: defaultItems
+        items: defaultItems,
       });
       try {
         await list.save();
@@ -133,7 +132,8 @@ app.get("/:listName", async (req, res) => {
       res.render("list", { 
         date: formattedDate, 
         newListItems: foundList.items, 
-        listTitle: listName 
+        listTitle: listName,
+        allLists, allLists,
       });
     }
     
@@ -152,17 +152,16 @@ app.post("/", async (req, res) => {
   });
   
   try {
-
+    const newListName = _.lowerCase(req.body.newListName);
     let allLists;
-    const selectedList = listName;
-
+    
     try {
       allLists = await List.find({}, "name"); 
     } catch (err) {
       console.error("Error fetching lists:", err);
       res.status(500).send("Error fetching lists.");
     }
-    
+
     if (listName === "Main") {
       // after we save our item, we redirect so that we can FIND all items and render them on screen
       try {
@@ -172,7 +171,9 @@ app.post("/", async (req, res) => {
         console.error("Error saving item:", err);
         res.status(500).send("Error saving item.");
       }
-    } else {
+    } 
+    
+    else if (listName) {
       try {
         const foundList = await List.findOne({ name: listName });
         foundList.items.push(item);
@@ -183,6 +184,32 @@ app.post("/", async (req, res) => {
         res.status(500).send("Error while accessing database.");
       }
     }
+    
+    else {
+      // Handle the creation of a new list with a specified name
+      if (newListName) {
+        const newList = new List({
+          name: newListName,
+          items: defaultItems,
+        });
+        try {
+          await newList.save();
+          res.render("/" + newListName, {
+            date: formattedDate,
+            newListItems: newList.items,
+            listTitle: newListName,
+            allLists: allLists,
+          });
+        } catch (err) {
+          console.error("Error creating new list:", err);
+          res.status(500).send("Error creating new list.");
+        }
+      } else {
+        // no list name is provided
+        res.redirect("/");
+      }
+    }
+
   } catch (err) {
     console.error("Error fetching lists:", err);
     res.status(500).send("Error fetching lists.");
