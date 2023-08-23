@@ -258,42 +258,65 @@ app.post("/delete", async (req, res) => {
 app.post("/openai/chatgpt", async (req, res) => {
   const listName = req.body.listName;
   const prompt = req.body.prompt;
-  
+
   const callToOpenAi = async () => {
     try {
       const chatCompletion = await openai.chat.completions.create({
         messages: [
           { role: "user", content: prompt },
-          { role: "assistant", content: "Sure! Here's a list of tasks:\nWrite the report\nAttend the meeting\nExercise for 30 minutes\nPrepare lunch\nReview emails" }
+          {
+            role: "assistant",
+            content:
+              "Sure! Here's a list of tasks:\nWrite the report\nAttend the meeting\nExercise for 30 minutes\nPrepare lunch\nReview emails",
+          },
         ],
         model: "gpt-3.5-turbo",
       });
-  
-      // Extract the AI response 
+
+      // Extract the AI response
       const aiResponse = chatCompletion.choices[0].message.content;
-      const tasksArray = aiResponse.split('\n').slice(1); // Remove the first line
-  
-      if (tasksArray.length > 0) {
-        console.log(tasksArray);
-        try {
-          await Item.insertMany(tasksArray);
-          console.log("AI items inserted successfully:");
-        } catch (err) {
-          console.error("Error adding AI items:", err);
-          res.status(500).send("Error adding AI items.");
+      const tasksArray = aiResponse.split("\n").slice(1); // Remove the first line
+
+      // Filter out empty strings from the tasksArray
+      const filteredTasksArray = tasksArray.filter((task) => task.trim() !== "");
+
+      if (filteredTasksArray.length > 0) {
+        console.log(filteredTasksArray);
+
+        if (listName === "Main") {
+          try {
+            await Item.insertMany(filteredTasksArray.map((name) => ({ name }))); // Convert to an array of objects
+            console.log("AI items inserted successfully:");
+            return res.redirect("/");
+          } catch (err) {
+            console.error("Error adding AI items:", err);
+            return res.status(500).send("Error adding AI items.");
+          }
+        } else { // find the current list and add items to that list
+          try {
+            const foundList = await List.findOne({ name: listName });
+            filteredTasksArray.forEach(async (taskName) => {
+              const newItem = new Item({ name: taskName });
+              foundList.items.push(newItem);
+            });
+            await foundList.save();
+            console.log("AI items inserted into list successfully:");
+            return res.redirect("/" + listName);
+          } catch (err) {
+            console.error("Error adding AI items to list:", err);
+            return res.status(500).send("Error adding AI items to list.");
+          }
         }
-        res.redirect("/");
-      } else {
+      } else { // not a relevant prompt
         return res.status(400).send("Please rewrite your prompt.");
-      }  
+      }
     } catch (err) {
       console.error(err);
+      return res.status(500).send("An error occurred while processing your request.");
     }
-  }
-  
+  }; 
   callToOpenAi();
 });
-
 
 app.post("/deleteList", async (req, res) => {
   const listToDelete = req.body.listName;

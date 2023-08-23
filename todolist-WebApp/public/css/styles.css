@@ -27,6 +27,10 @@ h1 {
   border: 2px solid #003366;
 }
 
+.box.todolist {
+  max-width: 1000px;
+}
+
 .lists ul{
   margin: 20px;
 }
@@ -168,10 +172,6 @@ footer p {
 textarea {
   margin-top: 10px;
   margin-bottom: 10px;
-}
-
-
-textarea {
   width: 100%;
   padding: 10px;
   border: 1px solid #ccc;
@@ -193,5 +193,3 @@ textarea {
 .btn:hover {
   background-color: #0056b3;
 }
-
-.lits

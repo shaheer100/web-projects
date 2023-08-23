@@ -13,7 +13,7 @@
   <h1> <%= date %> </h1>
 </div>
 
-<div class="box">
+<div class="box todolist">
   <% newListItems.forEach(item => {  %>
     <form action="/delete" method="POST">
       <div class="item">
@@ -48,7 +48,7 @@
     <h2>ChatGPT</h2>
       <form id="openaiForm" action="/openai/chatgpt" method="post">
         <textarea type="text" name="prompt" placeholder="Enter your prompt." autocomplete="off" rows="4" cols="46"></textarea>
-        <button type="submit" class="btn">Send the message.</button>
+        <button type="submit" class="btn" name="listName" value="<%= listTitle %>">Send the message.</button>
       </form>
     </div>
 </div>
