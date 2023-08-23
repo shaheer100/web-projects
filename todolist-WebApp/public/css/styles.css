@@ -1,3 +1,9 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 html {
   background-color: #f0f0f0;
   font-family: 'Arial', sans-serif;
@@ -19,6 +25,10 @@ h1 {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   padding: 20px;
   border: 2px solid #003366;
+}
+
+.lists ul{
+  margin: 20px;
 }
 
 #heading {
@@ -150,7 +160,38 @@ footer p {
   cursor: pointer;
   position: absolute;
   bottom: -80px;
-  right: 5px; /* Adjusted left position */
+  right: 5px; 
   margin-left: 10px;
   border-radius: 5px;
 }
+
+textarea {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+
+textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  resize: vertical;
+}
+
+.btn {
+  display: inline-block;
+  background-color: #003366;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+  background-color: #0056b3;
+}
+
+.lits

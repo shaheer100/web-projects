@@ -15,30 +15,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
 const openai = new OpenAI({
-  apiKey: "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",
+  apiKey: process.env.OPENAI_API_KEY,
 });
-
-const callToOpenAi = async () => {
-  try {
-    const chatCompletion = await openai.chat.completions.create({
-      messages: [
-        { role: "user", content: "Create an array of tasks for the day." },
-        { role: "assistant", content: "Sure! Here's a list of tasks:\nWrite the report\nAttend the meeting\nExercise for 30 minutes\nPrepare lunch\nReview emails" }
-      ],
-      model: "gpt-3.5-turbo",
-    });
-
-    // Extract the AI response (last message) and split it into an array of tasks
-    const aiResponse = chatCompletion.choices[0].message.content;
-    const tasksArray = aiResponse.split('\n').slice(1); // Remove the first line
-
-    console.log(tasksArray); // Log the array of tasks
-  } catch (err) {
-    console.error(err);
-  }
-}
-
-callToOpenAi();
 
 // formatted date for the title of the todo list
 const currentDate = new Date();
@@ -80,7 +58,7 @@ const defaultItems = [default1, default2, default3];
 // new list schema
 const listsSchema = {
   name: String,
-  items: [itemsSchema]
+  items: [itemsSchema],
 };
 
 const List = mongoose.model("List", listsSchema);
@@ -276,6 +254,46 @@ app.post("/delete", async (req, res) => {
     }
   }
 });
+
+app.post("/openai/chatgpt", async (req, res) => {
+  const listName = req.body.listName;
+  const prompt = req.body.prompt;
+  
+  const callToOpenAi = async () => {
+    try {
+      const chatCompletion = await openai.chat.completions.create({
+        messages: [
+          { role: "user", content: prompt },
+          { role: "assistant", content: "Sure! Here's a list of tasks:\nWrite the report\nAttend the meeting\nExercise for 30 minutes\nPrepare lunch\nReview emails" }
+        ],
+        model: "gpt-3.5-turbo",
+      });
+  
+      // Extract the AI response 
+      const aiResponse = chatCompletion.choices[0].message.content;
+      const tasksArray = aiResponse.split('\n').slice(1); // Remove the first line
+  
+      if (tasksArray.length > 0) {
+        console.log(tasksArray);
+        try {
+          await Item.insertMany(tasksArray);
+          console.log("AI items inserted successfully:");
+        } catch (err) {
+          console.error("Error adding AI items:", err);
+          res.status(500).send("Error adding AI items.");
+        }
+        res.redirect("/");
+      } else {
+        return res.status(400).send("Please rewrite your prompt.");
+      }  
+    } catch (err) {
+      console.error(err);
+    }
+  }
+  
+  callToOpenAi();
+});
+
 
 app.post("/deleteList", async (req, res) => {
   const listToDelete = req.body.listName;
