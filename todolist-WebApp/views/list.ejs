@@ -3,6 +3,12 @@
 <div class="box" id="heading">
   <div class="list-name">
     <h1><%= listTitle %></h1>
+    <% if (!(listTitle === "Main")) { %>     
+      <form class="delete-list-form" action="/deleteList" method="POST">
+        <input type="hidden" name="listName" value="<%= listTitle %>">
+        <button class="delete-list-button" type="submit">Delete List</button>
+      </form>
+    <% } %>
   </div>
   <h1> <%= date %> </h1>
 </div>

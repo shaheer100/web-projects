@@ -1,14 +1,44 @@
 import express from "express";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
+import dotenv from "dotenv";
+import OpenAI from "openai";
 import _ from "lodash";
+
+dotenv.config();
 
 const app = express();
 
 app.set('view engine', 'ejs');
 
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
+
+const openai = new OpenAI({
+  apiKey: "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",
+});
+
+const callToOpenAi = async () => {
+  try {
+    const chatCompletion = await openai.chat.completions.create({
+      messages: [
+        { role: "user", content: "Create an array of tasks for the day." },
+        { role: "assistant", content: "Sure! Here's a list of tasks:\nWrite the report\nAttend the meeting\nExercise for 30 minutes\nPrepare lunch\nReview emails" }
+      ],
+      model: "gpt-3.5-turbo",
+    });
+
+    // Extract the AI response (last message) and split it into an array of tasks
+    const aiResponse = chatCompletion.choices[0].message.content;
+    const tasksArray = aiResponse.split('\n').slice(1); // Remove the first line
+
+    console.log(tasksArray); // Log the array of tasks
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+callToOpenAi();
 
 // formatted date for the title of the todo list
 const currentDate = new Date();
@@ -123,7 +153,12 @@ app.get("/:listName", async (req, res) => {
       });
       try {
         await list.save();
-        res.redirect("/" + listName);
+        res.render("list", { 
+          date: formattedDate, 
+          newListItems: list.items, 
+          listTitle: listName,
+          allLists, allLists,
+        });
       } catch (err) {
         console.error("Error saving item:", err);
         res.status(500).send("Error saving item.");
@@ -194,7 +229,9 @@ app.post("/", async (req, res) => {
         });
         try {
           await newList.save();
-          res.render("/" + newListName, {
+          // add the newly created list to allLists array
+          allLists.push({ name: newListName });
+          res.render("list", {
             date: formattedDate,
             newListItems: newList.items,
             listTitle: newListName,
@@ -237,6 +274,18 @@ app.post("/delete", async (req, res) => {
       console.error("Error in deleting item from list:", err);
       res.status(500).send("Error deleting item from list.");
     }
+  }
+});
+
+app.post("/deleteList", async (req, res) => {
+  const listToDelete = req.body.listName;
+
+  try {
+    await List.findOneAndRemove({ name: listToDelete });
+    res.redirect("/");
+  } catch (err) {
+    console.error("Error in deleting list:", err);
+    res.status(500).send("Error deleting list.");
   }
 });
 
