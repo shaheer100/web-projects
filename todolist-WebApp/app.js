@@ -114,6 +114,11 @@ app.get("/:listName", async (req, res) => {
   const listName = _.lowerCase(req.params.listName);
   let allLists;
 
+  if (listName === "apple touch icon precomposed png" || listName === "apple touch icon png" || listName === "favicon ico") {
+    res.status(204).send(); // For example, respond with a "No Content" status
+    return; // Exit the route handler
+  }
+
   try {
     allLists = await List.find({}, "name"); 
   } catch (err) {
