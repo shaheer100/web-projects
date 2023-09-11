@@ -9,4 +9,4 @@ Randomized and challenging sequences at each level.
 Sound effects to enhance the user experience.
 Keeps track of the high score.
 
-🌐 Accessible Online: You can access AIPlanner and try out this exciting web app at [https://simon-game456.netlify.app].
+🌐 Accessible Online: You can access Simon Game and try out this amazing web app at [https://simon-game456.netlify.app].
